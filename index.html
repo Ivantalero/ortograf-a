@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cazadores de Tildes</title>
+
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: radial-gradient(circle at top, #1b2735, #090a0f);
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  .card {
+    width: 95%;
+    max-width: 520px;
+    background: #121c2d;
+    border-radius: 18px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 0 20px #00f2ff55;
+  }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .emoji { font-size: 4rem; margin-top: 6px; }
+
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin: 6px 0 10px;
+    opacity: 0.95;
+    font-weight: 900;
+  }
+
+  .pill {
+    background: #0d1524;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 0.95rem;
+  }
+
+  .hintArea {
+    margin: 8px 0 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .hintRow {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .hintBox {
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    display: none;
+  }
+
+  code {
+    background: #0d1524;
+    padding: 4px 10px;
+    border-radius: 10px;
+    color: #b9f7ff;
+    font-weight: 900;
+    font-size: 1.05rem;
+  }
+
+  .lines {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 16px 0 6px;
+  }
+
+  .line {
+    width: 70px;
+    height: 10px;
+    background: #1f2e4a;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: transform 0.08s ease, background 0.15s ease, opacity 0.15s ease;
+  }
+
+  .line:hover { transform: translateY(-1px); }
+
+  .line.correct { background: #00ff9c; }
+  .line.wrong   { background: #ff3b3b; }
+
+  .line.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  .input-panel { display: none; margin-top: 14px; }
+
+  input {
+    width: 92%;
+    padding: 10px;
+    font-size: 1.1rem;
+    border-radius: 10px;
+    border: none;
+    text-align: center;
+    outline: none;
+  }
+
+  .btn-row {
+    margin-top: 10px;
+    display: none;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  button {
+    border: none;
+    padding: 10px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 900;
+  }
+
+  .primary { background: #00f2ff; }
+  .success { background: #00ff9c; }
+  .hintBtn { background: #ffd24d; }
+
+  button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  .feedback {
+    margin-top: 12px;
+    min-height: 64px;
+    line-height: 1.35;
+  }
+
+  .small {
+    opacity: 0.85;
+    font-size: 0.95rem;
+    margin-top: 10px;
+  }
+</style>
+</head>
+
+<body>
+  <div class="card">
+
+    <!-- START SCREEN -->
+    <div class="screen active" id="screenStart">
+      <h1 style="margin:0 0 10px;">🎯 Cazadores de Tildes</h1>
+      <p style="opacity:.85; margin:0 0 14px; line-height:1.35;">
+        Elige la sílaba tónica y luego escribe la palabra correctamente.
+      </p>
+      <button class="primary" id="startBtn">Iniciar</button>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div class="screen" id="screenGame">
+      <div class="topbar">
+        <div class="pill" id="progressPill">Racha: 0 / 0</div>
+        <div class="pill" id="hintPill">Pistas: 5</div>
+      </div>
+
+      <div class="emoji" id="emoji"></div>
+
+      <!-- PISTA disponible desde el inicio -->
+      <div class="hintArea">
+        <div class="hintRow">
+          <button class="hintBtn" id="hintBtn">Pista</button>
+        </div>
+        <div class="hintBox" id="hintBox">
+          Letras reveladas: <code id="hintLetters"></code>
+        </div>
+      </div>
+
+      <p>Selecciona la sílaba tónica</p>
+      <div class="lines" id="lines"></div>
+
+      <div class="input-panel" id="inputPanel">
+        <p>Escribe la palabra correctamente:</p>
+        <input id="wordInput" autocomplete="off" placeholder="Escribe aquí..." />
+
+        <div class="btn-row" id="btnRow">
+          <button class="primary" id="checkBtn">Comprobar</button>
+          <button class="success" id="nextBtn">Siguiente</button>
+        </div>
+
+        <div class="small">Tip: presiona Enter para comprobar.</div>
+      </div>
+
+      <div class="feedback" id="feedback"></div>
+    </div>
+
+    <!-- WIN SCREEN -->
+    <div class="screen" id="screenWin">
+      <h2>🏆 ¡Lo lograste!</h2>
+      <p style="opacity:.85;">Completaste toda la lista sin errores.</p>
+      <button class="primary" id="playAgainBtn">Jugar de nuevo</button>
+    </div>
+
+  </div>
+
+<script>
+const words = [
+  { emoji:"🚗", correct:"carro",      syllableCount:2, stress:0 },
+  { emoji:"🚚", correct:"camión",     syllableCount:2, stress:1 },
+  { emoji:"✈️", correct:"avión",      syllableCount:2, stress:1 },
+  { emoji:"🦁", correct:"león",       syllableCount:2, stress:1 },
+  { emoji:"❤️", correct:"corazón",    syllableCount:3, stress:2 },
+  { emoji:"☕", correct:"café",       syllableCount:2, stress:1 },
+  { emoji:"🛋️", correct:"sofá",       syllableCount:2, stress:1 },
+  { emoji:"📞", correct:"teléfono",   syllableCount:4, stress:1 },
+  { emoji:"🎵", correct:"música",     syllableCount:3, stress:0 },
+  { emoji:"🔢", correct:"número",     syllableCount:3, stress:0 },
+  { emoji:"🐦", correct:"pájaro",     syllableCount:3, stress:0 },
+  { emoji:"🌳", correct:"árbol",      syllableCount:2, stress:0 },
+  { emoji:"✏️", correct:"lápiz",      syllableCount:2, stress:0 },
+  { emoji:"🍌", correct:"plátano",    syllableCount:3, stress:0 },
+  { emoji:"🍉", correct:"sandía",     syllableCount:3, stress:1 },
+  { emoji:"🍫", correct:"chocolate",  syllableCount:4, stress:2 },
+  { emoji:"🍬", correct:"azúcar",     syllableCount:3, stress:1 },
+  { emoji:"🧭", correct:"brújula",    syllableCount:3, stress:0 },
+  { emoji:"🩺", correct:"médico",     syllableCount:3, stress:0 },
+  { emoji:"⚡", correct:"rápido",     syllableCount:3, stress:0 },
+  { emoji:"📷", correct:"cámara",     syllableCount:3, stress:0 },
+  { emoji:"🚦", correct:"semáforo",   syllableCount:4, stress:1 },
+  { emoji:"⚽", correct:"balón",      syllableCount:2, stress:1 },
+  { emoji:"🎶", correct:"canción",    syllableCount:2, stress:1 },
+  { emoji:"⌚", correct:"reloj",      syllableCount:2, stress:1 },
+  { emoji:"⛓️", correct:"prisión",    syllableCount:2, stress:1 }
+];
+
+// Pantallas
+const screenStart = document.getElementById("screenStart");
+const screenGame  = document.getElementById("screenGame");
+const screenWin   = document.getElementById("screenWin");
+
+const startBtn = document.getElementById("startBtn");
+const playAgainBtn = document.getElementById("playAgainBtn");
+
+// UI juego
+const emojiEl = document.getElementById("emoji");
+const linesEl = document.getElementById("lines");
+const inputPanel = document.getElementById("inputPanel");
+const input = document.getElementById("wordInput");
+const feedback = document.getElementById("feedback");
+const btnRow = document.getElementById("btnRow");
+const hintBtn = document.getElementById("hintBtn");
+const checkBtn = document.getElementById("checkBtn");
+const nextBtn = document.getElementById("nextBtn");
+const progressPill = document.getElementById("progressPill");
+const hintPill = document.getElementById("hintPill");
+const hintBox = document.getElementById("hintBox");
+const hintLettersEl = document.getElementById("hintLetters");
+
+// Estado partida
+let deck = [];
+let pos = 0;
+
+let unlocked = false;
+let answered = false;
+
+// Pistas globales (por partida)
+let hintsLeft = 5;
+
+// Pistas por palabra (qué letras ya se revelaron)
+let revealedByWordIndex = new Map(); // key: índice real en words, value: Set(indices de letra)
+
+// Utilidades
+function showScreen(which) {
+  [screenStart, screenGame, screenWin].forEach(s => s.classList.remove("active"));
+  which.classList.add("active");
+}
+
+function normalizeTextExact(s) {
+  return s.trim().toLowerCase().normalize("NFC");
+}
+
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function buildDeck() {
+  deck = shuffleArray([...Array(words.length).keys()]);
+  pos = 0;
+}
+
+function updateProgress() {
+  progressPill.textContent = `Racha: ${pos} / ${words.length}`;
+}
+
+function updateHintsUI() {
+  hintPill.textContent = `Pistas: ${hintsLeft}`;
+  hintBtn.disabled = (hintsLeft <= 0) || answered;
+}
+
+function setLinesEnabled(enabled) {
+  document.querySelectorAll(".line").forEach(l => l.classList.toggle("disabled", !enabled));
+}
+
+function clearLineStates() {
+  document.querySelectorAll(".line").forEach(l => l.classList.remove("correct", "wrong"));
+}
+
+function currentWordIndex() {
+  return deck[pos]; // índice dentro de words
+}
+
+function currentWord() {
+  return words[currentWordIndex()];
+}
+
+function resetToStart(reasonMessage) {
+  feedback.textContent = reasonMessage;
+
+  answered = true;
+  setLinesEnabled(false);
+  input.disabled = true;
+  checkBtn.disabled = true;
+  nextBtn.style.display = "none";
+  btnRow.style.display = "none";
+  inputPanel.style.display = "none";
+
+  updateHintsUI();
+
+  setTimeout(() => {
+    buildDeck();
+    revealedByWordIndex = new Map();
+    hintsLeft = 5;
+    loadWord();
+  }, 900);
+}
+
+function renderHintLetters() {
+  const idx = currentWordIndex();
+  const w = currentWord();
+  const set = revealedByWordIndex.get(idx) || new Set();
+  const chars = [...w.correct];
+
+  const letters = [...set].map(i => chars[i]).join(" ");
+  if (letters.length === 0) {
+    hintBox.style.display = "none";
+  } else {
+    hintBox.style.display = "block";
+    hintLettersEl.textContent = letters.toUpperCase();
+  }
+}
+
+function findAccentIndex(word) {
+  const accented = new Set(["á","é","í","ó","ú","Á","É","Í","Ó","Ú"]);
+  const chars = [...word];
+  for (let i = 0; i < chars.length; i++) {
+    if (accented.has(chars[i])) return i;
+  }
+  return -1;
+}
+
+function revealOneLetter() {
+  if (hintsLeft <= 0 || answered) return;
+
+  const idx = currentWordIndex();
+  const w = currentWord();
+  const chars = [...w.correct];
+  const accentPos = findAccentIndex(w.correct);
+
+  let set = revealedByWordIndex.get(idx);
+  if (!set) {
+    set = new Set();
+    revealedByWordIndex.set(idx, set);
+  }
+
+  const candidates = [];
+  for (let i = 0; i < chars.length; i++) {
+    if (set.has(i)) continue;
+    if (i === accentPos) continue; // nunca revela la letra acentuada
+    candidates.push(i);
+  }
+
+  if (candidates.length === 0) {
+    feedback.textContent = "ℹ️ No hay más letras disponibles para revelar (sin mostrar la tilde).";
+    return;
+  }
+
+  const pick = candidates[Math.floor(Math.random() * candidates.length)];
+  set.add(pick);
+
+  hintsLeft -= 1;
+  updateHintsUI();
+  renderHintLetters();
+
+  // Mantiene el mensaje anterior si existe; si está vacío, un mensaje corto:
+  if (!feedback.textContent) feedback.textContent = "💡 Pista revelada.";
+}
+
+function loadWord() {
+  unlocked = false;
+  answered = false;
+
+  const w = currentWord();
+
+  emojiEl.textContent = w.emoji;
+  linesEl.innerHTML = "";
+  feedback.textContent = "";
+  input.value = "";
+  input.disabled = true;
+
+  inputPanel.style.display = "none";
+  btnRow.style.display = "none";
+  nextBtn.style.display = "none";
+  checkBtn.disabled = false;
+
+  for (let i = 0; i < w.syllableCount; i++) {
+    const div = document.createElement("div");
+    div.className = "line";
+    div.addEventListener("click", () => onSelectLine(div, i));
+    linesEl.appendChild(div);
+  }
+
+  clearLineStates();
+  setLinesEnabled(true);
+
+  updateProgress();
+  renderHintLetters(); // <-- se muestra desde el inicio (si ya pidió pistas en esta palabra)
+  updateHintsUI();     // <-- botón activo desde el inicio
+}
+
+function onSelectLine(el, i) {
+  if (answered) return;
+
+  const w = currentWord();
+  clearLineStates();
+
+  if (i !== w.stress) {
+    el.classList.add("wrong");
+    resetToStart("❌ Tónica incorrecta. Vuelves al inicio.");
+    return;
+  }
+
+  el.classList.add("correct");
+  unlocked = true;
+
+  feedback.textContent = "✅ Tónica correcta. Ahora escribe la palabra.";
+
+  inputPanel.style.display = "block";
+  btnRow.style.display = "flex";
+  input.disabled = false;
+  input.focus();
+
+  // La pista se mantiene (no se borra)
+  renderHintLetters();
+  updateHintsUI();
+}
+
+function checkAnswer() {
+  if (answered) return;
+
+  if (!unlocked) {
+    feedback.textContent = "Primero acierta la sílaba tónica 👆";
+    return;
+  }
+
+  const w = currentWord();
+  const typed = input.value;
+
+  if (!typed.trim()) {
+    feedback.textContent = "Escribe una palabra para comprobar.";
+    return;
+  }
+
+  const ok = (normalizeTextExact(typed) === normalizeTextExact(w.correct));
+
+  if (ok) {
+    feedback.textContent = "✅ ¡Correcto!";
+    answered = true;
+    setLinesEnabled(false);
+    input.disabled = true;
+    checkBtn.disabled = true;
+
+    nextBtn.style.display = "inline-block";
+    btnRow.style.display = "flex";
+    nextBtn.focus();
+
+    updateHintsUI();
+    return;
+  }
+
+  // Incorrecto => reinicia racha
+  resetToStart("❌ Palabra incorrecta. Vuelves al inicio.");
+}
+
+function nextWord() {
+  pos++;
+  updateProgress();
+
+  if (pos >= words.length) {
+    showScreen(screenWin);
+    return;
+  }
+
+  loadWord();
+}
+
+// Eventos
+hintBtn.addEventListener("click", revealOneLetter);
+
+checkBtn.addEventListener("click", checkAnswer);
+input.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") checkAnswer();
+});
+
+nextBtn.addEventListener("click", nextWord);
+
+startBtn.addEventListener("click", () => {
+  buildDeck();
+  revealedByWordIndex = new Map();
+  hintsLeft = 5;
+  showScreen(screenGame);
+  loadWord();
+});
+
+playAgainBtn.addEventListener("click", () => {
+  showScreen(screenStart);
+});
+</script>
+</body>
+</html>
