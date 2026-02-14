@@ -1,545 +1,1570 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Cazadores de Tildes</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Presente Simple - App</title>
+  <style>
+    :root{
+      --bg1:#eaf3ff;
+      --bg2:#cfe6ff;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#475569;
+      --shadow: 0 12px 30px rgba(2, 6, 23, .10);
+      --radius: 18px;
 
-<style>
-  body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: radial-gradient(circle at top, #1b2735, #090a0f);
-    color: #fff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-  }
+      --green:#22c55e;
+      --blue:#3b82f6;
+      --orange:#f59e0b;
+      --purple:#8b5cf6;
 
-  .card {
-    width: 95%;
-    max-width: 520px;
-    background: #121c2d;
-    border-radius: 18px;
-    padding: 20px;
-    text-align: center;
-    box-shadow: 0 0 20px #00f2ff55;
-  }
+      --accent: rgba(59,130,246,.35);
 
-  .screen { display: none; }
-  .screen.active { display: block; }
+      --okbg: rgba(34,197,94,.10);
+      --okbd: rgba(34,197,94,.35);
+      --badbg: rgba(239,68,68,.10);
+      --badbd: rgba(239,68,68,.35);
+      --warnbg: rgba(245,158,11,.12);
+      --warnbd: rgba(245,158,11,.35);
+    }
 
-  .emoji { font-size: 4rem; margin-top: 6px; }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, var(--bg1), var(--bg2));
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 22px;
+    }
 
-  .topbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    margin: 6px 0 10px;
-    opacity: 0.95;
-    font-weight: 900;
-  }
+    .app{
+      width:min(980px, 100%);
+      background: rgba(255,255,255,.35);
+      border: 1px solid rgba(255,255,255,.55);
+      border-radius: calc(var(--radius) + 10px);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      backdrop-filter: blur(8px);
+      position: relative;
+    }
 
-  .pill {
-    background: #0d1524;
-    padding: 6px 10px;
-    border-radius: 999px;
-    font-size: 0.95rem;
-  }
+    .topbar{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding: 18px 18px;
+      background: rgba(255,255,255,.6);
+      border-bottom: 1px solid rgba(15,23,42,.08);
+    }
+    .back-btn{
+      border:0;
+      background: var(--card);
+      border: 1px solid rgba(15,23,42,.10);
+      border-radius: 999px;
+      padding: 10px 14px;
+      cursor:pointer;
+      font-weight: 700;
+      transition: transform .08s ease;
+    }
+    .back-btn:active{ transform: scale(.98); }
 
-  .hintArea {
-    margin: 8px 0 4px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-  }
+    .screen-title{
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: .2px;
+    }
 
-  .hintRow {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
+    .content{ padding: 20px; }
 
-  .hintBox {
-    font-weight: 900;
-    letter-spacing: 0.5px;
-    display: none;
-  }
+    /* Home */
+    .home{
+      padding: 40px 22px 28px;
+      text-align:center;
+    }
+    .logo{
+      width:84px;
+      height:84px;
+      margin: 0 auto 14px;
+      border-radius: 22px;
+      background: rgba(255,255,255,.75);
+      border: 1px solid rgba(15,23,42,.08);
+      display:grid;
+      place-items:center;
+      font-size: 40px;
+      box-shadow: 0 8px 20px rgba(2,6,23,.10);
+    }
+    h1{
+      margin: 6px 0 6px;
+      font-size: clamp(26px, 4vw, 38px);
+      line-height:1.1;
+      letter-spacing: .2px;
+    }
+    .subtitle{
+      margin: 0 auto 10px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .helper{
+      margin: 0 auto 22px;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 14px;
+      max-width: 680px;
+    }
 
-  code {
-    background: #0d1524;
-    padding: 4px 10px;
-    border-radius: 10px;
-    color: #b9f7ff;
-    font-weight: 900;
-    font-size: 1.05rem;
-  }
+    .btn-grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      width: min(560px, 100%);
+      margin: 0 auto;
+    }
+    @media (min-width: 760px){
+      .btn-grid{ grid-template-columns: 1fr 1fr; }
+    }
+    .nav-btn{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      padding: 16px 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.80);
+      cursor:pointer;
+      font-weight: 900;
+      font-size: 16px;
+      box-shadow: 0 8px 20px rgba(2,6,23,.08);
+      transition: transform .08s ease;
+      text-align:left;
+    }
+    .nav-btn:active{ transform: scale(.99); }
+    .chip{
+      width:40px;
+      height:40px;
+      display:grid;
+      place-items:center;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 20px;
+      flex: 0 0 40px;
+    }
+    .chip.green{ background: var(--green); }
+    .chip.blue{ background: var(--blue); }
+    .chip.orange{ background: var(--orange); }
+    .chip.purple{ background: var(--purple); }
 
-  .lines {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin: 16px 0 6px;
-  }
+    .footer-note{
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 13px;
+    }
 
-  .line {
-    width: 70px;
-    height: 10px;
-    background: #1f2e4a;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: transform 0.08s ease, background 0.15s ease, opacity 0.15s ease;
-  }
+    /* Cards & Tables */
+    .section{ display:grid; gap: 14px; }
+    .card{
+      background: rgba(255,255,255,.85);
+      border: 1px solid rgba(15,23,42,.10);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: 0 10px 24px rgba(2,6,23,.07);
+    }
+    .card h2{
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+    .muted{ color: var(--muted); }
 
-  .line:hover { transform: translateY(-1px); }
+    .tag{
+      display:inline-block;
+      font-size: 12px;
+      font-weight: 900;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.9);
+      margin-bottom: 8px;
+    }
 
-  .line.correct { background: #00ff9c; }
-  .line.wrong   { background: #ff3b3b; }
+    table{
+      width:100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      overflow:hidden;
+      border-radius: 14px;
+      border: 1px solid rgba(15,23,42,.10);
+      background: #fff;
+    }
+    th, td{
+      padding: 12px 12px;
+      border-bottom: 1px solid rgba(15,23,42,.08);
+      vertical-align: top;
+      font-size: 14px;
+    }
+    th{
+      text-align:left;
+      background: rgba(15,23,42,.04);
+      font-weight: 900;
+    }
+    tr:last-child td{ border-bottom:0; }
 
-  .line.disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none !important;
-  }
+    /* Tabs */
+    .tabs{
+      display:flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .tab{
+      border: 1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.85);
+      padding: 10px 12px;
+      border-radius: 999px;
+      cursor:pointer;
+      font-weight: 900;
+      font-size: 14px;
+    }
+    .tab.active{ outline: 2px solid var(--accent); }
 
-  .input-panel { display: none; margin-top: 14px; }
+    .word-grid{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 10px;
+    }
+    @media (min-width: 760px){
+      .word-grid{ grid-template-columns: repeat(3, minmax(0,1fr)); }
+    }
 
-  input {
-    width: 92%;
-    padding: 10px;
-    font-size: 1.1rem;
-    border-radius: 10px;
-    border: none;
-    text-align: center;
-    outline: none;
-  }
+    .word{
+      padding: 12px 12px;
+      border-radius: 14px;
+      background: rgba(15,23,42,.04);
+      border: 1px solid rgba(15,23,42,.08);
+      font-weight: 900;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+    .word small{
+      font-weight: 800;
+      color: var(--muted);
+    }
 
-  .btn-row {
-    margin-top: 10px;
-    display: none;
-    gap: 10px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
+    .pills{
+      display:flex;
+      flex-wrap:wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .pill{
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(15,23,42,.06);
+      border: 1px solid rgba(15,23,42,.08);
+      font-weight: 900;
+      font-size: 13px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
 
-  button {
-    border: none;
-    padding: 10px 18px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: 900;
-  }
+    /* Clickable learning items */
+    .tap{
+      cursor:pointer;
+      user-select:none;
+      border-radius: 14px;
+      outline: none;
+      transition: transform .06s ease;
+    }
+    .tap:active{ transform: scale(.99); }
 
-  .primary { background: #00f2ff; }
-  .success { background: #00ff9c; }
-  .hintBtn { background: #ffd24d; }
+    .example-line{
+      display:flex;
+      flex-direction:column;
+      gap: 6px;
+    }
+    .example-en{
+      font-size: 16px;
+      font-weight: 900;
+    }
+    .example-tip{
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--muted);
+    }
 
-  button:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
-  }
+    /* Hide/Show screens */
+    .screen{ display:none; }
+    .screen.active{ display:block; }
 
-  .feedback {
-    margin-top: 12px;
-    min-height: 64px;
-    line-height: 1.35;
-  }
+    /* Modal */
+    .modal-overlay{
+      position: fixed;
+      inset: 0;
+      background: rgba(2,6,23,.45);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 18px;
+      z-index: 1000;
+    }
+    .modal-overlay.show{ display:flex; }
 
-  .small {
-    opacity: 0.85;
-    font-size: 0.95rem;
-    margin-top: 10px;
-  }
-</style>
+    .modal{
+      width: min(520px, 100%);
+      background: rgba(255,255,255,.95);
+      border: 1px solid rgba(15,23,42,.12);
+      border-radius: 18px;
+      box-shadow: 0 18px 50px rgba(2,6,23,.20);
+      padding: 16px;
+      backdrop-filter: blur(8px);
+    }
+    .modal-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .modal-title{
+      font-weight: 900;
+      font-size: 14px;
+      color: var(--muted);
+      letter-spacing:.2px;
+    }
+    .modal-close{
+      border: 0;
+      cursor: pointer;
+      background: rgba(15,23,42,.06);
+      border: 1px solid rgba(15,23,42,.10);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-weight: 900;
+    }
+    .modal-body{
+      font-size: 18px;
+      font-weight: 900;
+      line-height: 1.25;
+      padding: 10px 12px;
+      background: rgba(15,23,42,.04);
+      border: 1px dashed rgba(15,23,42,.12);
+      border-radius: 14px;
+      color: var(--text);
+      word-break: break-word;
+    }
+    .modal-foot{
+      margin-top: 10px;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--muted);
+      text-align: right;
+    }
+
+    /* Activities UI */
+    .game-grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    @media (min-width: 760px){
+      .game-grid{ grid-template-columns: 1fr 1fr; }
+    }
+    .game-btn{
+      display:flex;
+      gap: 12px;
+      align-items:flex-start;
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.85);
+      cursor:pointer;
+      font-weight: 900;
+      box-shadow: 0 8px 20px rgba(2,6,23,.08);
+      transition: transform .08s ease;
+      text-align:left;
+    }
+    .game-btn:active{ transform: scale(.99); }
+    .game-btn:disabled{
+      opacity: .55;
+      cursor:not-allowed;
+    }
+    .game-meta{
+      display:flex;
+      flex-direction:column;
+      gap: 4px;
+    }
+    .game-desc{
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      line-height: 1.25;
+    }
+    .badge{
+      display:inline-block;
+      margin-top: 6px;
+      font-size: 12px;
+      font-weight: 900;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(15,23,42,.10);
+      background: rgba(15,23,42,.04);
+      width: fit-content;
+    }
+
+    .game-panel{ display:none; }
+    .game-panel.show{ display:block; }
+
+    .rule-line{
+      font-size: 16px;
+      font-weight: 900;
+      line-height: 1.35;
+    }
+    .blank{
+      width: 140px;
+      max-width: 46vw;
+      padding: 10px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(15,23,42,.15);
+      background: rgba(255,255,255,.95);
+      font-weight: 900;
+      font-size: 16px;
+      outline: none;
+    }
+    .blank:focus{
+      box-shadow: 0 0 0 3px var(--accent);
+      border-color: rgba(59,130,246,.35);
+    }
+
+    .rule-controls{
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    .btn{
+      border: 0;
+      cursor: pointer;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-weight: 900;
+      border: 1px solid rgba(15,23,42,.12);
+      background: rgba(255,255,255,.9);
+    }
+    .btn.primary{
+      background: rgba(59,130,246,.12);
+      border-color: rgba(59,130,246,.35);
+    }
+    .btn:disabled{
+      opacity: .55;
+      cursor:not-allowed;
+    }
+
+    .status{
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      font-weight: 900;
+      display:none;
+      border: 1px solid transparent;
+    }
+    .status.show{ display:block; }
+    .status.ok{ background: var(--okbg); border-color: var(--okbd); }
+    .status.bad{ background: var(--badbg); border-color: var(--badbd); }
+    .status.warn{ background: var(--warnbg); border-color: var(--warnbd); }
+
+    .progress{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      color: var(--muted);
+      font-weight: 900;
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+
+    /* GAME 2 inline sentence */
+    .g2-bar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .pillbox{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(15,23,42,.12);
+      background: rgba(255,255,255,.9);
+      font-weight: 900;
+    }
+    .pillbox strong{ font-variant-numeric: tabular-nums; }
+
+    .g2-sentence{
+      font-size: 18px;
+      font-weight: 900;
+      line-height: 1.55;
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(15,23,42,.04);
+      border: 1px dashed rgba(15,23,42,.12);
+      overflow-wrap: anywhere;
+    }
+    .g2-sentence input{
+      display:inline-block;
+      width: 130px;
+      max-width: 44vw;
+      padding: 8px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(15,23,42,.18);
+      background: rgba(255,255,255,.95);
+      font-weight: 900;
+      font-size: 16px;
+      outline:none;
+      vertical-align: baseline;
+      margin: 0 6px;
+    }
+    .g2-sentence input:focus{
+      box-shadow: 0 0 0 3px var(--accent);
+      border-color: rgba(59,130,246,.35);
+    }
+    .hint{
+      color: var(--muted);
+      font-weight: 900;
+      margin-left: 6px;
+      white-space: nowrap;
+    }
+
+    .congrats{
+      text-align:center;
+      padding: 22px;
+    }
+    .congrats h3{
+      margin: 0 0 6px;
+      font-size: 28px;
+      letter-spacing:.2px;
+    }
+    .congrats p{
+      margin: 0;
+      color: var(--muted);
+      font-weight: 800;
+    }
+  </style>
 </head>
 
 <body>
-  <div class="card">
+  <div class="app">
 
-    <!-- START SCREEN -->
-    <div class="screen active" id="screenStart">
-      <h1 style="margin:0 0 10px;">🎯 Cazadores de Tildes</h1>
-      <p style="opacity:.85; margin:0 0 14px; line-height:1.35;">
-        Elige la sílaba tónica y luego escribe la palabra correctamente.
-      </p>
-      <button class="primary" id="startBtn">Iniciar</button>
-    </div>
+    <!-- HOME -->
+    <section id="homeScreen" class="screen active">
+      <div class="home">
+        <div class="logo" aria-hidden="true">🎓</div>
 
-    <!-- GAME SCREEN -->
-    <div class="screen" id="screenGame">
+        <h1>Presente Simple</h1>
+        <div class="subtitle">Simple Present Tense</div>
+
+        <p class="helper">
+          Elige una sección. Las instrucciones están en español, pero los ejemplos y cuadros están en inglés.
+          <strong>Tip:</strong> toca ejemplos/palabras/adverbios para ver la traducción en un mini pop-up.
+        </p>
+
+        <div class="btn-grid">
+          <button class="nav-btn" data-go="functionScreen">
+            <span class="chip green">🗣</span>
+            <span>Función del lenguaje</span>
+          </button>
+
+          <button class="nav-btn" data-go="grammarScreen">
+            <span class="chip blue">📖</span>
+            <span>Explicación</span>
+          </button>
+
+          <button class="nav-btn" data-go="vocabScreen">
+            <span class="chip orange">📚</span>
+            <span>Vocabulario</span>
+          </button>
+
+          <button class="nav-btn" data-go="activitiesScreen">
+            <span class="chip purple">🎮</span>
+            <span>Actividades</span>
+          </button>
+        </div>
+
+        <div class="footer-note">
+          Consejo: primero mira “Función del lenguaje”, luego “Explicación”.
+        </div>
+      </div>
+    </section>
+
+    <!-- FUNCIÓN DEL LENGUAJE -->
+    <section id="functionScreen" class="screen">
       <div class="topbar">
-        <div class="pill" id="progressPill">Racha: 0 / 0</div>
-        <div class="pill" id="hintPill">Pistas: 5</div>
+        <button class="back-btn" data-back>← Volver</button>
+        <div class="screen-title">Función del lenguaje</div>
       </div>
 
-      <div class="emoji" id="emoji"></div>
+      <div class="content">
+        <div class="section">
+          <div class="card">
+            <h2>¿Para qué sirve el Presente Simple?</h2>
+            <p class="muted">
+              Se usa para hablar de <strong>rutinas</strong>, <strong>hábitos</strong>, <strong>hechos generales</strong>,
+              <strong>horarios</strong> y <strong>situaciones permanentes</strong>.
+            </p>
+            <p class="muted">
+              Objetivo comunicativo: decir lo que haces normalmente o lo que es verdad en general.
+            </p>
+            <p class="muted" style="font-size:13px; font-weight:800;">
+              Interacción: toca cada ejemplo en inglés para ver su traducción.
+            </p>
+          </div>
 
-      <!-- PISTA disponible desde el inicio -->
-      <div class="hintArea">
-        <div class="hintRow">
-          <button class="hintBtn" id="hintBtn">Pista</button>
-        </div>
-        <div class="hintBox" id="hintBox">
-          Letras reveladas: <code id="hintLetters"></code>
+          <div class="card tap js-translate" data-es="Me despierto a las 7 a. m.">
+            <span class="tag">✅ Rutinas</span>
+            <div class="example-line">
+              <div class="example-tip">Ejemplo (inglés) — toca:</div>
+              <div class="example-en">I <strong>wake up</strong> at 7 a.m.</div>
+            </div>
+          </div>
+
+          <div class="card tap js-translate" data-es="Ella toma café todos los días.">
+            <span class="tag">✅ Hábitos</span>
+            <div class="example-line">
+              <div class="example-tip">Ejemplo (inglés) — toca:</div>
+              <div class="example-en">She <strong>drinks</strong> coffee every day.</div>
+            </div>
+          </div>
+
+          <div class="card tap js-translate" data-es="El sol sale por el este.">
+            <span class="tag">✅ Hechos generales</span>
+            <div class="example-line">
+              <div class="example-tip">Ejemplo (inglés) — toca:</div>
+              <div class="example-en">The sun <strong>rises</strong> in the east.</div>
+            </div>
+          </div>
+
+          <div class="card tap js-translate" data-es="El tren sale a las 6 p. m.">
+            <span class="tag">✅ Horarios fijos</span>
+            <div class="example-line">
+              <div class="example-tip">Ejemplo (inglés) — toca:</div>
+              <div class="example-en">The train <strong>leaves</strong> at 6 p.m.</div>
+            </div>
+          </div>
+
+          <div class="card tap js-translate" data-es="Vivo en Colombia.">
+            <span class="tag">✅ Situaciones permanentes</span>
+            <div class="example-line">
+              <div class="example-tip">Ejemplo (inglés) — toca:</div>
+              <div class="example-en">I <strong>live</strong> in Colombia.</div>
+            </div>
+          </div>
         </div>
       </div>
+    </section>
 
-      <p>Selecciona la sílaba tónica</p>
-      <div class="lines" id="lines"></div>
-
-      <div class="input-panel" id="inputPanel">
-        <p>Escribe la palabra correctamente:</p>
-        <input id="wordInput" autocomplete="off" placeholder="Escribe aquí..." />
-
-        <div class="btn-row" id="btnRow">
-          <button class="primary" id="checkBtn">Comprobar</button>
-          <button class="success" id="nextBtn">Siguiente</button>
-        </div>
-
-        <div class="small">Tip: presiona Enter para comprobar.</div>
+    <!-- EXPLICACIÓN -->
+    <section id="grammarScreen" class="screen">
+      <div class="topbar">
+        <button class="back-btn" data-back>← Volver</button>
+        <div class="screen-title">Explicación</div>
       </div>
 
-      <div class="feedback" id="feedback"></div>
-    </div>
+      <div class="content">
+        <div class="section">
+          <div class="card">
+            <h2>¿Cómo funciona gramaticalmente?</h2>
+            <p class="muted">
+              Lee los títulos en español y mira las estructuras y ejemplos en inglés.
+              <strong>Tip:</strong> en los adverbios, toca cada palabra para ver su significado.
+            </p>
+          </div>
 
-    <!-- WIN SCREEN -->
-    <div class="screen" id="screenWin">
-      <h2>🏆 ¡Lo lograste!</h2>
-      <p style="opacity:.85;">Completaste toda la lista sin errores.</p>
-      <button class="primary" id="playAgainBtn">Jugar de nuevo</button>
-    </div>
+          <div class="card">
+            <h2>1) Afirmativa ✅</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Subject</th>
+                  <th>Verb Form</th>
+                  <th>Example</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>I / You / We / They</td>
+                  <td>Base form</td>
+                  <td>I <strong>play</strong> soccer.</td>
+                </tr>
+                <tr>
+                  <td>He / She / It</td>
+                  <td>Verb + <strong>s</strong> / <strong>es</strong></td>
+                  <td>She <strong>plays</strong> soccer.</td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="muted" style="margin-top:10px;">
+              Nota (español): Con <strong>he / she / it</strong> normalmente agregas <strong>-s</strong> o <strong>-es</strong>.
+            </p>
+          </div>
+
+          <div class="card">
+            <h2>2) Negativa ❌</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Subject</th>
+                  <th>Auxiliary</th>
+                  <th>Verb</th>
+                  <th>Example</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>I / You / We / They</td>
+                  <td>do not (don’t)</td>
+                  <td>base form</td>
+                  <td>I <strong>don’t</strong> play.</td>
+                </tr>
+                <tr>
+                  <td>He / She / It</td>
+                  <td>does not (doesn’t)</td>
+                  <td>base form</td>
+                  <td>She <strong>doesn’t</strong> play.</td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="muted" style="margin-top:10px;">
+              Nota (español): Con <strong>doesn’t</strong>, el verbo principal queda en <strong>forma base</strong>.
+            </p>
+          </div>
+
+          <div class="card">
+            <h2>3) Interrogativa ❓</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Auxiliary</th>
+                  <th>Subject</th>
+                  <th>Verb</th>
+                  <th>Example</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Do</td>
+                  <td>I / you / we / they</td>
+                  <td>base form</td>
+                  <td><strong>Do</strong> you <strong>play</strong>?</td>
+                </tr>
+                <tr>
+                  <td>Does</td>
+                  <td>he / she / it</td>
+                  <td>base form</td>
+                  <td><strong>Does</strong> she <strong>play</strong>?</td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="muted" style="margin-top:10px;">
+              Nota (español): Para preguntas usamos <strong>Do/Does</strong> + sujeto + verbo en base.
+            </p>
+          </div>
+
+          <div class="card">
+            <h2>Adverbios de frecuencia ⏱</h2>
+            <p class="muted">
+              Son palabras que dicen “con qué frecuencia” haces algo. Toca cada adverbio:
+            </p>
+
+            <div class="pills">
+              <span class="pill tap js-translate" data-es="Siempre">Always</span>
+              <span class="pill tap js-translate" data-es="Usualmente / Normalmente">Usually</span>
+              <span class="pill tap js-translate" data-es="A menudo / Frecuentemente">Often</span>
+              <span class="pill tap js-translate" data-es="A veces">Sometimes</span>
+              <span class="pill tap js-translate" data-es="Nunca">Never</span>
+            </div>
+
+            <p style="margin-top:10px;">
+              Example (English): She <strong>always</strong> studies at night.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VOCABULARIO -->
+    <section id="vocabScreen" class="screen">
+      <div class="topbar">
+        <button class="back-btn" data-back>← Volver</button>
+        <div class="screen-title">Vocabulario</div>
+      </div>
+
+      <div class="content">
+        <div class="card">
+          <h2>Palabras básicas para practicar</h2>
+          <p class="muted">Toca una palabra en inglés para ver su significado.</p>
+
+          <div class="tabs" role="tablist" aria-label="Categorías de vocabulario">
+            <button class="tab active" data-tab="verbsTab" role="tab" aria-selected="true">Verbos</button>
+            <button class="tab" data-tab="adjectivesTab" role="tab" aria-selected="false">Adjetivos</button>
+            <button class="tab" data-tab="ictTab" role="tab" aria-selected="false">Tecnología (TIC)</button>
+            <button class="tab" data-tab="freqTab" role="tab" aria-selected="false">Frecuencia</button>
+          </div>
+
+          <!-- VERBS -->
+          <div id="verbsTab" class="tab-panel">
+            <div class="word-grid">
+              <div class="word tap js-translate" data-es="jugar">play <small>v.</small></div>
+              <div class="word tap js-translate" data-es="comer">eat <small>v.</small></div>
+              <div class="word tap js-translate" data-es="estudiar">study <small>v.</small></div>
+              <div class="word tap js-translate" data-es="trabajar">work <small>v.</small></div>
+              <div class="word tap js-translate" data-es="vivir">live <small>v.</small></div>
+              <div class="word tap js-translate" data-es="leer">read <small>v.</small></div>
+              <div class="word tap js-translate" data-es="escribir">write <small>v.</small></div>
+              <div class="word tap js-translate" data-es="correr">run <small>v.</small></div>
+              <div class="word tap js-translate" data-es="hablar">speak <small>v.</small></div>
+              <div class="word tap js-translate" data-es="ver / mirar">watch <small>v.</small></div>
+              <div class="word tap js-translate" data-es="usar">use <small>v.</small></div>
+              <div class="word tap js-translate" data-es="aprender">learn <small>v.</small></div>
+              <div class="word tap js-translate" data-es="ir">go <small>v.</small></div>
+              <div class="word tap js-translate" data-es="venir">come <small>v.</small></div>
+              <div class="word tap js-translate" data-es="gustar / amar">like <small>v.</small></div>
+              <div class="word tap js-translate" data-es="necesitar">need <small>v.</small></div>
+              <div class="word tap js-translate" data-es="querer">want <small>v.</small></div>
+              <div class="word tap js-translate" data-es="tener">have <small>v.</small></div>
+              <div class="word tap js-translate" data-es="hacer">do <small>v.</small></div>
+              <div class="word tap js-translate" data-es="dormir">sleep <small>v.</small></div>
+              <div class="word tap js-translate" data-es="caminar">walk <small>v.</small></div>
+              <div class="word tap js-translate" data-es="conducir / manejar">drive <small>v.</small></div>
+              <div class="word tap js-translate" data-es="ver (con los ojos)">see <small>v.</small></div>
+              <div class="word tap js-translate" data-es="pensar">think <small>v.</small></div>
+            </div>
+          </div>
+
+          <!-- ADJECTIVES -->
+          <div id="adjectivesTab" class="tab-panel" style="display:none;">
+            <div class="word-grid">
+              <div class="word tap js-translate" data-es="feliz">happy <small>adj.</small></div>
+              <div class="word tap js-translate" data-es="cansado/a">tired <small>adj.</small></div>
+              <div class="word tap js-translate" data-es="ocupado/a">busy <small>adj.</small></div>
+              <div class="word tap js-translate" data-es="inteligente">intelligent <small>adj.</small></div>
+              <div class="word tap js-translate" data-es="joven">young <small>adj.</small></div>
+              <div class="word tap js-translate" data-es="viejo/a">old <small>adj.</small></div>
+              <div class="word tap js-translate" data-es="rápido/a">fast <small>adj.</small></div>
+              <div class="word tap js-translate" data-es="lento/a">slow <small>adj.</small></div>
+              <div class="word tap js-translate" data-es="amable">friendly <small>adj.</small></div>
+              <div class="word tap js-translate" data-es="creativo/a">creative <small>adj.</small></div>
+              <div class="word tap js-translate" data-es="organizado/a">organized <small>adj.</small></div>
+              <div class="word tap js-translate" data-es="curioso/a">curious <small>adj.</small></div>
+              <div class="word tap js-translate" data-es="bueno/a">good <small>adj.</small></div>
+              <div class="word tap js-translate" data-es="malo/a">bad <small>adj.</small></div>
+              <div class="word tap js-translate" data-es="grande">big <small>adj.</small></div>
+              <div class="word tap js-translate" data-es="pequeño/a">small <small>adj.</small></div>
+              <div class="word tap js-translate" data-es="nuevo/a">new <small>adj.</small></div>
+              <div class="word tap js-translate" data-es="anticuado/a">old-fashioned <small>adj.</small></div>
+              <div class="word tap js-translate" data-es="fácil">easy <small>adj.</small></div>
+              <div class="word tap js-translate" data-es="difícil">difficult <small>adj.</small></div>
+              <div class="word tap js-translate" data-es="importante">important <small>adj.</small></div>
+              <div class="word tap js-translate" data-es="interesante">interesting <small>adj.</small></div>
+              <div class="word tap js-translate" data-es="fuerte">strong <small>adj.</small></div>
+              <div class="word tap js-translate" data-es="débil">weak <small>adj.</small></div>
+            </div>
+          </div>
+
+          <!-- ICT -->
+          <div id="ictTab" class="tab-panel" style="display:none;">
+            <div class="word-grid">
+              <div class="word tap js-translate" data-es="computador / computadora">computer <small>n.</small></div>
+              <div class="word tap js-translate" data-es="internet">internet <small>n.</small></div>
+              <div class="word tap js-translate" data-es="software">software <small>n.</small></div>
+              <div class="word tap js-translate" data-es="hardware">hardware <small>n.</small></div>
+              <div class="word tap js-translate" data-es="correo electrónico">email <small>n.</small></div>
+              <div class="word tap js-translate" data-es="sitio web / página web">website <small>n.</small></div>
+              <div class="word tap js-translate" data-es="aplicación">app <small>n.</small></div>
+              <div class="word tap js-translate" data-es="teclado">keyboard <small>n.</small></div>
+              <div class="word tap js-translate" data-es="pantalla">screen <small>n.</small></div>
+              <div class="word tap js-translate" data-es="red">network <small>n.</small></div>
+              <div class="word tap js-translate" data-es="contraseña">password <small>n.</small></div>
+              <div class="word tap js-translate" data-es="nube">cloud <small>n.</small></div>
+              <div class="word tap js-translate" data-es="archivo">file <small>n.</small></div>
+              <div class="word tap js-translate" data-es="carpeta">folder <small>n.</small></div>
+              <div class="word tap js-translate" data-es="enlace / vínculo">link <small>n.</small></div>
+              <div class="word tap js-translate" data-es="descargar">download <small>v.</small></div>
+              <div class="word tap js-translate" data-es="subir (a internet)">upload <small>v.</small></div>
+              <div class="word tap js-translate" data-es="iniciar sesión">log in <small>v.</small></div>
+              <div class="word tap js-translate" data-es="cerrar sesión">log out <small>v.</small></div>
+              <div class="word tap js-translate" data-es="actualizar">update <small>v.</small></div>
+              <div class="word tap js-translate" data-es="enviar mensaje">message <small>v.</small></div>
+              <div class="word tap js-translate" data-es="navegador">browser <small>n.</small></div>
+              <div class="word tap js-translate" data-es="buscador">search engine <small>n.</small></div>
+              <div class="word tap js-translate" data-es="videollamada">video call <small>n.</small></div>
+            </div>
+          </div>
+
+          <!-- FREQUENCY -->
+          <div id="freqTab" class="tab-panel" style="display:none;">
+            <p class="muted" style="margin: 0 0 10px;">
+              Adverbios de frecuencia (en inglés). Toca para ver español.
+            </p>
+            <div class="word-grid">
+              <div class="word tap js-translate" data-es="Siempre">always <small>adv.</small></div>
+              <div class="word tap js-translate" data-es="Usualmente / Normalmente">usually <small>adv.</small></div>
+              <div class="word tap js-translate" data-es="A menudo / Frecuentemente">often <small>adv.</small></div>
+              <div class="word tap js-translate" data-es="A veces">sometimes <small>adv.</small></div>
+              <div class="word tap js-translate" data-es="Nunca">never <small>adv.</small></div>
+              <div class="word tap js-translate" data-es="Casi siempre">almost always <small>adv.</small></div>
+              <div class="word tap js-translate" data-es="Casi nunca">hardly ever <small>adv.</small></div>
+              <div class="word tap js-translate" data-es="De vez en cuando">occasionally <small>adv.</small></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ACTIVIDADES -->
+    <section id="activitiesScreen" class="screen">
+      <div class="topbar">
+        <button class="back-btn" data-back>← Volver</button>
+        <div class="screen-title">Actividades</div>
+      </div>
+
+      <div class="content">
+        <div class="section">
+
+          <!-- MENÚ -->
+          <div id="gamesMenu" class="card">
+            <h2>Elige un juego</h2>
+            <p class="muted">Empieza con el Juego 1. Luego juega el Juego 2 (racha 15/15).</p>
+
+            <div class="game-grid" style="margin-top:12px;">
+              <button class="game-btn" id="startGame1">
+                <div class="chip purple" style="flex:0 0 40px;">1</div>
+                <div class="game-meta">
+                  <div>Juego 1: Completa la regla</div>
+                  <div class="game-desc">Escribe la(s) palabra(s) que faltan en cada regla.</div>
+                  <span class="badge">Nivel: muy básico</span>
+                </div>
+              </button>
+
+              <button class="game-btn" id="openGame2">
+                <div class="chip purple" style="flex:0 0 40px;">2</div>
+                <div class="game-meta">
+                  <div>Juego 2: Auxiliar + Verbo</div>
+                  <div class="game-desc">START inicia toda la racha. 20 segundos por oración. Si fallas, vuelves al inicio.</div>
+                  <span class="badge">Racha 15/15</span>
+                </div>
+              </button>
+
+              <button class="game-btn" disabled title="Próximamente">
+                <div class="chip purple" style="flex:0 0 40px;">3</div>
+                <div class="game-meta">
+                  <div>Juego 3: Próximamente</div>
+                  <div class="game-desc">Más juegos pronto.</div>
+                  <span class="badge">Próximamente</span>
+                </div>
+              </button>
+
+              <button class="game-btn" disabled title="Próximamente">
+                <div class="chip purple" style="flex:0 0 40px;">4</div>
+                <div class="game-meta">
+                  <div>Juego 4: Próximamente</div>
+                  <div class="game-desc">Más juegos pronto.</div>
+                  <span class="badge">Próximamente</span>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- JUEGO 1 -->
+          <div id="game1Panel" class="card game-panel">
+            <div class="progress">
+              <div><strong>Juego 1:</strong> Completa la regla</div>
+              <div id="game1Progress">1 / 6</div>
+            </div>
+
+            <p class="muted" style="margin-top:0;">
+              Escribe lo que falta. Luego presiona <strong>Comprobar</strong>.
+            </p>
+
+            <div id="ruleContainer" class="rule-line" style="margin-top:10px;"></div>
+
+            <div class="rule-controls">
+              <button class="btn primary" id="checkRuleBtn">Comprobar</button>
+              <button class="btn" id="nextRuleBtn" disabled>Siguiente</button>
+              <button class="btn" id="restartGame1Btn">Reiniciar</button>
+              <button class="btn" id="exitGame1Btn">Salir</button>
+            </div>
+
+            <div id="statusBox" class="status"></div>
+          </div>
+
+          <!-- JUEGO 2 -->
+          <div id="game2Panel" class="card game-panel">
+            <div class="g2-bar">
+              <div class="pillbox">🔥 Racha: <strong id="g2Streak">0</strong>/15</div>
+              <div class="pillbox">⏱ Tiempo: <strong id="g2Time">20</strong>s</div>
+            </div>
+
+            <p class="muted" style="margin-top:0;">
+              Presiona <strong>START</strong> para iniciar toda la racha.
+              Luego escribe en los espacios y presiona <strong>Comprobar</strong>.
+            </p>
+
+            <div id="g2Sentence" class="g2-sentence"></div>
+
+            <div class="rule-controls">
+              <button class="btn primary" id="g2StartBtn">START</button>
+              <button class="btn primary" id="g2CheckBtn" disabled>Comprobar</button>
+              <button class="btn" id="g2RestartBtn">Reiniciar</button>
+              <button class="btn" id="g2ExitBtn">Salir</button>
+            </div>
+
+            <div id="g2Status" class="status"></div>
+          </div>
+
+          <!-- CONGRATS (Juego 2) -->
+          <div id="g2WinPanel" class="card game-panel">
+            <div class="congrats">
+              <div style="font-size:48px;">🏆</div>
+              <h3>Congratulations!</h3>
+              <p>¡Lograste 15/15!</p>
+              <div class="rule-controls" style="justify-content:center; margin-top:14px;">
+                <button class="btn primary" id="g2PlayAgainBtn">Jugar otra vez</button>
+                <button class="btn" id="g2WinExitBtn">Volver al menú</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
 
   </div>
 
-<script>
-const words = [
-  { emoji:"🚗", correct:"carro",      syllableCount:2, stress:0 },
-  { emoji:"🚚", correct:"camión",     syllableCount:2, stress:1 },
-  { emoji:"✈️", correct:"avión",      syllableCount:2, stress:1 },
-  { emoji:"🦁", correct:"león",       syllableCount:2, stress:1 },
-  { emoji:"❤️", correct:"corazón",    syllableCount:3, stress:2 },
-  { emoji:"☕", correct:"café",       syllableCount:2, stress:1 },
-  { emoji:"🛋️", correct:"sofá",       syllableCount:2, stress:1 },
-  { emoji:"📞", correct:"teléfono",   syllableCount:4, stress:1 },
-  { emoji:"🎵", correct:"música",     syllableCount:3, stress:0 },
-  { emoji:"🔢", correct:"número",     syllableCount:3, stress:0 },
-  { emoji:"🐦", correct:"pájaro",     syllableCount:3, stress:0 },
-  { emoji:"🌳", correct:"árbol",      syllableCount:2, stress:0 },
-  { emoji:"✏️", correct:"lápiz",      syllableCount:2, stress:0 },
-  { emoji:"🍌", correct:"plátano",    syllableCount:3, stress:0 },
-  { emoji:"🍉", correct:"sandía",     syllableCount:3, stress:1 },
-  { emoji:"🍫", correct:"chocolate",  syllableCount:4, stress:2 },
-  { emoji:"🍬", correct:"azúcar",     syllableCount:3, stress:1 },
-  { emoji:"🧭", correct:"brújula",    syllableCount:3, stress:0 },
-  { emoji:"🩺", correct:"médico",     syllableCount:3, stress:0 },
-  { emoji:"⚡", correct:"rápido",     syllableCount:3, stress:0 },
-  { emoji:"📷", correct:"cámara",     syllableCount:3, stress:0 },
-  { emoji:"🚦", correct:"semáforo",   syllableCount:4, stress:1 },
-  { emoji:"⚽", correct:"balón",      syllableCount:2, stress:1 },
-  { emoji:"🎶", correct:"canción",    syllableCount:2, stress:1 },
-  { emoji:"⌚", correct:"reloj",      syllableCount:2, stress:1 },
-  { emoji:"⛓️", correct:"prisión",    syllableCount:2, stress:1 }
-];
+  <!-- MODAL -->
+  <div id="modalOverlay" class="modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-header">
+        <div id="modalTitle" class="modal-title">Traducción</div>
+        <button id="modalClose" class="modal-close" aria-label="Cerrar">Cerrar</button>
+      </div>
+      <div id="modalBody" class="modal-body"></div>
+      <div class="modal-foot">Toca fuera del cuadro o “Cerrar”</div>
+    </div>
+  </div>
 
-// Pantallas
-const screenStart = document.getElementById("screenStart");
-const screenGame  = document.getElementById("screenGame");
-const screenWin   = document.getElementById("screenWin");
+  <script>
+    // ========= NAVEGACIÓN ENTRE PANTALLAS =========
+    const screens = Array.from(document.querySelectorAll(".screen"));
+    function showScreen(id){
+      screens.forEach(s => s.classList.remove("active"));
+      const el = document.getElementById(id);
+      if(el) el.classList.add("active");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
 
-const startBtn = document.getElementById("startBtn");
-const playAgainBtn = document.getElementById("playAgainBtn");
+    // ========= MODAL (TRADUCCIONES) =========
+    const modalOverlay = document.getElementById("modalOverlay");
+    const modalBody = document.getElementById("modalBody");
+    const modalClose = document.getElementById("modalClose");
 
-// UI juego
-const emojiEl = document.getElementById("emoji");
-const linesEl = document.getElementById("lines");
-const inputPanel = document.getElementById("inputPanel");
-const input = document.getElementById("wordInput");
-const feedback = document.getElementById("feedback");
-const btnRow = document.getElementById("btnRow");
-const hintBtn = document.getElementById("hintBtn");
-const checkBtn = document.getElementById("checkBtn");
-const nextBtn = document.getElementById("nextBtn");
-const progressPill = document.getElementById("progressPill");
-const hintPill = document.getElementById("hintPill");
-const hintBox = document.getElementById("hintBox");
-const hintLettersEl = document.getElementById("hintLetters");
+    function openModal(text){
+      modalBody.textContent = text; // SOLO traducción
+      modalOverlay.classList.add("show");
+      modalOverlay.setAttribute("aria-hidden", "false");
+      modalClose.focus();
+    }
+    function closeModal(){
+      modalOverlay.classList.remove("show");
+      modalOverlay.setAttribute("aria-hidden", "true");
+      modalBody.textContent = "";
+    }
+    modalClose.addEventListener("click", closeModal);
+    modalOverlay.addEventListener("click", (e) => {
+      if(e.target === modalOverlay) closeModal();
+    });
+    document.addEventListener("keydown", (e) => {
+      if(e.key === "Escape" && modalOverlay.classList.contains("show")) closeModal();
+    });
 
-// Estado partida
-let deck = [];
-let pos = 0;
+    // ========= UTIL =========
+    function normalize(str){
+      return (str || "")
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, " ");
+    }
+    function showStatus(el, type, text){
+      el.className = `status show ${type}`;
+      el.textContent = text;
+      el.style.display = "block";
+    }
+    function clearStatus(el){
+      el.className = "status";
+      el.textContent = "";
+      el.style.display = "none";
+    }
 
-let unlocked = false;
-let answered = false;
+    // ========= CLICK HANDLER GLOBAL (tabs + navegación + traducciones) =========
+    document.addEventListener("click", (e) => {
+      const goBtn = e.target.closest("[data-go]");
+      const backBtn = e.target.closest("[data-back]");
+      const tabBtn = e.target.closest(".tab");
+      const translatable = e.target.closest(".js-translate");
 
-// Pistas globales (por partida)
-let hintsLeft = 5;
+      if(goBtn){
+        showScreen(goBtn.dataset.go);
+        return;
+      }
+      if(backBtn){
+        showScreen("homeScreen");
+        return;
+      }
 
-// Pistas por palabra (qué letras ya se revelaron)
-let revealedByWordIndex = new Map(); // key: índice real en words, value: Set(indices de letra)
+      if(tabBtn){
+        const tabId = tabBtn.dataset.tab;
 
-// Utilidades
-function showScreen(which) {
-  [screenStart, screenGame, screenWin].forEach(s => s.classList.remove("active"));
-  which.classList.add("active");
-}
+        document.querySelectorAll(".tab").forEach(t => {
+          t.classList.remove("active");
+          t.setAttribute("aria-selected", "false");
+        });
+        tabBtn.classList.add("active");
+        tabBtn.setAttribute("aria-selected", "true");
 
-function normalizeTextExact(s) {
-  return s.trim().toLowerCase().normalize("NFC");
-}
+        document.querySelectorAll(".tab-panel").forEach(p => p.style.display = "none");
+        const panel = document.getElementById(tabId);
+        if(panel) panel.style.display = "block";
+        return;
+      }
 
-function shuffleArray(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
+      if(translatable){
+        const es = translatable.getAttribute("data-es");
+        if(es) openModal(es);
+      }
+    });
 
-function buildDeck() {
-  deck = shuffleArray([...Array(words.length).keys()]);
-  pos = 0;
-}
+    // ========= ACTIVITIES PANELS =========
+    const gamesMenu = document.getElementById("gamesMenu");
+    const game1Panel = document.getElementById("game1Panel");
+    const game2Panel = document.getElementById("game2Panel");
+    const g2WinPanel = document.getElementById("g2WinPanel");
 
-function updateProgress() {
-  progressPill.textContent = `Racha: ${pos} / ${words.length}`;
-}
+    function showMenu(){
+      gamesMenu.style.display = "block";
+      game1Panel.classList.remove("show");
+      game2Panel.classList.remove("show");
+      g2WinPanel.classList.remove("show");
+      stopG2Timer();
+      g2Started = false;
+    }
 
-function updateHintsUI() {
-  hintPill.textContent = `Pistas: ${hintsLeft}`;
-  hintBtn.disabled = (hintsLeft <= 0) || answered;
-}
+    // ========= JUEGO 1 =========
+    const startGame1 = document.getElementById("startGame1");
+    const ruleContainer = document.getElementById("ruleContainer");
+    const game1Progress = document.getElementById("game1Progress");
+    const checkRuleBtn = document.getElementById("checkRuleBtn");
+    const nextRuleBtn = document.getElementById("nextRuleBtn");
+    const restartGame1Btn = document.getElementById("restartGame1Btn");
+    const exitGame1Btn = document.getElementById("exitGame1Btn");
+    const statusBox = document.getElementById("statusBox");
 
-function setLinesEnabled(enabled) {
-  document.querySelectorAll(".line").forEach(l => l.classList.toggle("disabled", !enabled));
-}
+    const rules = [
+      {
+        parts: [
+          "Cuando el pronombre es una tercera persona (he/she/it), se debe agregar ",
+          { blank: true, placeholder: "?" },
+          " o ",
+          { blank: true, placeholder: "?" },
+          " al verbo principal."
+        ],
+        unorderedSet: ["s","es"],
+        feedbackOk: "¡Correcto! Con he/she/it agregamos -s o -es."
+      },
+      {
+        parts: ["En negativa con he/she/it usamos ", { blank:true, placeholder:"?" }, " + verbo en forma base."],
+        answers: [["doesn't","doesnt","does not"]],
+        feedbackOk: "¡Bien! He/She/It → doesn't / does not + base form."
+      },
+      {
+        parts: ["En preguntas con he/she/it usamos ", { blank:true, placeholder:"?" }, " + subject + base verb."],
+        answers: [["does"]],
+        feedbackOk: "¡Correcto! He/She/It → Does + subject + base verb."
+      },
+      {
+        parts: ["En negativa con I/you/we/they usamos ", { blank:true, placeholder:"?" }, " + verbo en forma base."],
+        answers: [["don't","dont","do not"]],
+        feedbackOk: "¡Correcto! I/You/We/They → don't / do not + base form."
+      },
+      {
+        parts: ["En preguntas con I/you/we/they usamos ", { blank:true, placeholder:"?" }, " + subject + base verb."],
+        answers: [["do"]],
+        feedbackOk: "¡Bien! I/You/We/They → Do + subject + base verb."
+      },
+      {
+        parts: ["Después de do/does, el verbo principal queda en forma ", { blank:true, placeholder:"?" }, "."],
+        answers: [["base"]],
+        feedbackOk: "¡Excelente! Do/Does + base verb (sin -s)."
+      }
+    ];
 
-function clearLineStates() {
-  document.querySelectorAll(".line").forEach(l => l.classList.remove("correct", "wrong"));
-}
+    let currentRuleIndex = 0;
 
-function currentWordIndex() {
-  return deck[pos]; // índice dentro de words
-}
+    function renderRule(index){
+      clearStatus(statusBox);
+      nextRuleBtn.disabled = true;
+      game1Progress.textContent = `${index + 1} / ${rules.length}`;
 
-function currentWord() {
-  return words[currentWordIndex()];
-}
+      const rule = rules[index];
+      let html = "";
+      let blanks = 0;
+      rule.parts.forEach(part => {
+        if(typeof part === "string") html += part;
+        else if(part.blank){
+          html += ` <input class="blank" id="blank_${blanks}" autocomplete="off" inputmode="text" placeholder="${part.placeholder}"> `;
+          blanks++;
+        }
+      });
+      ruleContainer.innerHTML = html;
 
-function resetToStart(reasonMessage) {
-  feedback.textContent = reasonMessage;
+      const first = document.getElementById("blank_0");
+      if(first) first.focus();
+    }
 
-  answered = true;
-  setLinesEnabled(false);
-  input.disabled = true;
-  checkBtn.disabled = true;
-  nextBtn.style.display = "none";
-  btnRow.style.display = "none";
-  inputPanel.style.display = "none";
+    function checkRule(){
+      const rule = rules[currentRuleIndex];
+      const inputs = Array.from(ruleContainer.querySelectorAll(".blank"));
+      const user = inputs.map(i => normalize(i.value));
 
-  updateHintsUI();
+      if(user.some(x => x.length === 0)){
+        showStatus(statusBox,"bad","Completa todos los espacios.");
+        return;
+      }
 
-  setTimeout(() => {
-    buildDeck();
-    revealedByWordIndex = new Map();
-    hintsLeft = 5;
-    loadWord();
-  }, 900);
-}
+      if(rule.unorderedSet){
+        const expected = rule.unorderedSet.map(normalize).sort().join("|");
+        const got = user.slice().sort().join("|");
+        if(expected === got){
+          showStatus(statusBox,"ok",rule.feedbackOk);
+          nextRuleBtn.disabled = false;
+        } else {
+          showStatus(statusBox,"bad","No es correcto. Intenta otra vez.");
+        }
+        return;
+      }
 
-function renderHintLetters() {
-  const idx = currentWordIndex();
-  const w = currentWord();
-  const set = revealedByWordIndex.get(idx) || new Set();
-  const chars = [...w.correct];
+      let ok = true;
+      for(let i=0;i<rule.answers.length;i++){
+        const acceptable = rule.answers[i].map(normalize);
+        if(!acceptable.includes(user[i] || "")){ ok = false; break; }
+      }
+      if(ok){
+        showStatus(statusBox,"ok",rule.feedbackOk);
+        nextRuleBtn.disabled = false;
+      } else {
+        showStatus(statusBox,"bad","No es correcto. Intenta otra vez.");
+      }
+    }
 
-  const letters = [...set].map(i => chars[i]).join(" ");
-  if (letters.length === 0) {
-    hintBox.style.display = "none";
-  } else {
-    hintBox.style.display = "block";
-    hintLettersEl.textContent = letters.toUpperCase();
-  }
-}
+    function nextRule(){
+      if(currentRuleIndex < rules.length - 1){
+        currentRuleIndex++;
+        renderRule(currentRuleIndex);
+      } else {
+        ruleContainer.innerHTML = `<div style="font-size:18px; font-weight:900;">¡Terminaste! ✅</div>
+          <div class="muted" style="margin-top:8px; font-weight:800;">
+            Puedes presionar “Reiniciar” para practicar otra vez.
+          </div>`;
+        showStatus(statusBox,"ok","Muy bien. Completaste todas las reglas.");
+        nextRuleBtn.disabled = true;
+      }
+    }
 
-function findAccentIndex(word) {
-  const accented = new Set(["á","é","í","ó","ú","Á","É","Í","Ó","Ú"]);
-  const chars = [...word];
-  for (let i = 0; i < chars.length; i++) {
-    if (accented.has(chars[i])) return i;
-  }
-  return -1;
-}
+    function startGameOne(){
+      gamesMenu.style.display = "none";
+      game2Panel.classList.remove("show");
+      g2WinPanel.classList.remove("show");
+      game1Panel.classList.add("show");
+      currentRuleIndex = 0;
+      renderRule(currentRuleIndex);
+    }
+    function exitGameOne(){
+      game1Panel.classList.remove("show");
+      showMenu();
+    }
+    function restartGameOne(){
+      currentRuleIndex = 0;
+      renderRule(currentRuleIndex);
+    }
 
-function revealOneLetter() {
-  if (hintsLeft <= 0 || answered) return;
+    startGame1.addEventListener("click", startGameOne);
+    checkRuleBtn.addEventListener("click", checkRule);
+    nextRuleBtn.addEventListener("click", nextRule);
+    restartGame1Btn.addEventListener("click", restartGameOne);
+    exitGame1Btn.addEventListener("click", exitGameOne);
 
-  const idx = currentWordIndex();
-  const w = currentWord();
-  const chars = [...w.correct];
-  const accentPos = findAccentIndex(w.correct);
+    // ========= JUEGO 2 =========
+    const openGame2 = document.getElementById("openGame2");
+    const g2Sentence = document.getElementById("g2Sentence");
+    const g2StartBtn = document.getElementById("g2StartBtn");
+    const g2CheckBtn = document.getElementById("g2CheckBtn");
+    const g2RestartBtn = document.getElementById("g2RestartBtn");
+    const g2ExitBtn = document.getElementById("g2ExitBtn");
+    const g2Status = document.getElementById("g2Status");
+    const g2StreakEl = document.getElementById("g2Streak");
+    const g2TimeEl = document.getElementById("g2Time");
+    const g2PlayAgainBtn = document.getElementById("g2PlayAgainBtn");
+    const g2WinExitBtn = document.getElementById("g2WinExitBtn");
 
-  let set = revealedByWordIndex.get(idx);
-  if (!set) {
-    set = new Set();
-    revealedByWordIndex.set(idx, set);
-  }
+    // Tus 15 frases
+    const g2Items = [
+      { mode:"affirm", subject:"Sharon", hint:"(drink)", rest:"coffee every morning.", verb:["drinks"] },
+      { mode:"affirm", subject:"The students", hint:"(play)", rest:"soccer on Saturdays.", verb:["play"] },
+      { mode:"neg", subject:"My sister", hint:"(not/ watch)", rest:"TV at night.", aux:["doesn't","does not","doesnt"], verb:["watch"] },
+      { mode:"neg", subject:"My friends and I", hint:"(not/ eat)", rest:"fast food every day.", aux:["don't","do not","dont"], verb:["eat"] },
+      { mode:"q", subject:"Tom", hint:"(work)", rest:"on Sundays?", aux:["does"], verb:["work"] },
+      { mode:"q", subject:"your neighbors", hint:"(live)", rest:"near here?", aux:["do"], verb:["live"] },
+      { mode:"affirm", subject:"Daniel", hint:"(study)", rest:"English after school.", verb:["studies"] },
+      { mode:"neg", subject:"The baby", hint:"(not/ sleep)", rest:"inside the crib.", aux:["doesn't","does not","doesnt"], verb:["sleep"] },
+      { mode:"affirm", subject:"My parents", hint:"(like)", rest:"chocolate.", verb:["like"] },
+      { mode:"q", subject:"Laura", hint:"(drive)", rest:"to work?", aux:["does"], verb:["drive"] },
+      { mode:"neg", subject:"The music teacher", hint:"(not/ play)", rest:"the piano.", aux:["doesn't","does not","doesnt"], verb:["play"] },
+      { mode:"affirm", subject:"The employees", hint:"(go)", rest:"to the gym on Mondays.", verb:["go"] },
+      { mode:"q", subject:"the children", hint:"(travel)", rest:"in summer?", aux:["do"], verb:["travel"] },
+      { mode:"affirm", subject:"The weather", hint:"(rain)", rest:"a lot in winter.", verb:["rains"] },
+      { mode:"neg", subject:"The new student", hint:"(not/ read)", rest:"books in English.", aux:["doesn't","does not","doesnt"], verb:["read"] },
+    ];
 
-  const candidates = [];
-  for (let i = 0; i < chars.length; i++) {
-    if (set.has(i)) continue;
-    if (i === accentPos) continue; // nunca revela la letra acentuada
-    candidates.push(i);
-  }
+    const ROUND_SECONDS = 20;
+    let g2Streak = 0;
+    let g2Index = 0;
+    let g2Time = ROUND_SECONDS;
+    let g2Interval = null;
+    let g2Locked = false;
+    let g2Started = false;
 
-  if (candidates.length === 0) {
-    feedback.textContent = "ℹ️ No hay más letras disponibles para revelar (sin mostrar la tilde).";
-    return;
-  }
+    function setG2Streak(val){
+      g2Streak = val;
+      g2StreakEl.textContent = String(g2Streak);
+    }
 
-  const pick = candidates[Math.floor(Math.random() * candidates.length)];
-  set.add(pick);
+    function stopG2Timer(){
+      if(g2Interval){
+        clearInterval(g2Interval);
+        g2Interval = null;
+      }
+    }
 
-  hintsLeft -= 1;
-  updateHintsUI();
-  renderHintLetters();
+    function startG2Timer(){
+      stopG2Timer();
+      g2Time = ROUND_SECONDS;
+      g2TimeEl.textContent = String(g2Time);
+      g2Interval = setInterval(() => {
+        g2Time--;
+        g2TimeEl.textContent = String(g2Time);
+        if(g2Time <= 0){
+          failG2("Tiempo terminado. ");
+        }
+      }, 1000);
+    }
 
-  // Mantiene el mensaje anterior si existe; si está vacío, un mensaje corto:
-  if (!feedback.textContent) feedback.textContent = "💡 Pista revelada.";
-}
+    function currentG2Item(){
+      return g2Items[g2Index];
+    }
 
-function loadWord() {
-  unlocked = false;
-  answered = false;
+    function renderG2Sentence(){
+      clearStatus(g2Status);
+      g2Locked = false;
 
-  const w = currentWord();
+      const item = currentG2Item();
+      const auxInput = `<input id="g2AuxIn" autocomplete="off" inputmode="text" placeholder="aux">`;
+      const verbInput = `<input id="g2VerbIn" autocomplete="off" inputmode="text" placeholder="verb">`;
 
-  emojiEl.textContent = w.emoji;
-  linesEl.innerHTML = "";
-  feedback.textContent = "";
-  input.value = "";
-  input.disabled = true;
+      let html = "";
+      if(item.mode === "affirm"){
+        html = `${item.subject} ${verbInput} <span class="hint">${item.hint}</span> ${item.rest}`;
+      } else if(item.mode === "neg"){
+        html = `${item.subject} ${auxInput} ${verbInput} <span class="hint">${item.hint}</span> ${item.rest}`;
+      } else { // q
+        html = `${auxInput} ${item.subject} ${verbInput} <span class="hint">${item.hint}</span> ${item.rest}`;
+      }
+      g2Sentence.innerHTML = html;
 
-  inputPanel.style.display = "none";
-  btnRow.style.display = "none";
-  nextBtn.style.display = "none";
-  checkBtn.disabled = false;
+      const auxEl = document.getElementById("g2AuxIn");
+      const verbEl = document.getElementById("g2VerbIn");
 
-  for (let i = 0; i < w.syllableCount; i++) {
-    const div = document.createElement("div");
-    div.className = "line";
-    div.addEventListener("click", () => onSelectLine(div, i));
-    linesEl.appendChild(div);
-  }
+      if(auxEl) auxEl.disabled = !g2Started;
+      if(verbEl) verbEl.disabled = !g2Started;
 
-  clearLineStates();
-  setLinesEnabled(true);
+      if(auxEl) auxEl.value = "";
+      if(verbEl) verbEl.value = "";
 
-  updateProgress();
-  renderHintLetters(); // <-- se muestra desde el inicio (si ya pidió pistas en esta palabra)
-  updateHintsUI();     // <-- botón activo desde el inicio
-}
+      if(g2Started){
+        if(auxEl) auxEl.focus();
+        else if(verbEl) verbEl.focus();
+      }
 
-function onSelectLine(el, i) {
-  if (answered) return;
+      g2StartBtn.disabled = g2Started;
+      g2CheckBtn.disabled = !g2Started;
 
-  const w = currentWord();
-  clearLineStates();
+      if(g2Started){
+        startG2Timer();
+      } else {
+        stopG2Timer();
+        g2TimeEl.textContent = String(ROUND_SECONDS);
+      }
+    }
 
-  if (i !== w.stress) {
-    el.classList.add("wrong");
-    resetToStart("❌ Tónica incorrecta. Vuelves al inicio.");
-    return;
-  }
+    function winG2(){
+      stopG2Timer();
+      game2Panel.classList.remove("show");
+      g2WinPanel.classList.add("show");
+    }
 
-  el.classList.add("correct");
-  unlocked = true;
+    // ✅ MEJORA: mostrar respuesta correcta 1s antes de reiniciar
+    function failG2(prefixMsg){
+      if(g2Locked) return;
+      g2Locked = true;
 
-  feedback.textContent = "✅ Tónica correcta. Ahora escribe la palabra.";
+      stopG2Timer();
 
-  inputPanel.style.display = "block";
-  btnRow.style.display = "flex";
-  input.disabled = false;
-  input.focus();
+      const item = currentG2Item();
+      const correctAux = (item.mode === "affirm") ? "" : (item.aux?.[0] || "");
+      const correctVerb = (item.verb?.[0] || "");
 
-  // La pista se mantiene (no se borra)
-  renderHintLetters();
-  updateHintsUI();
-}
+      let answerText = "";
+      if(item.mode === "affirm"){
+        answerText = `Respuesta correcta: ${correctVerb}`;
+      } else {
+        answerText = `Respuesta correcta: ${correctAux} ${correctVerb}`;
+      }
 
-function checkAnswer() {
-  if (answered) return;
+      showStatus(g2Status, "bad", `${prefixMsg}${answerText}`);
 
-  if (!unlocked) {
-    feedback.textContent = "Primero acierta la sílaba tónica 👆";
-    return;
-  }
+      setG2Streak(0);
+      g2Index = 0;
 
-  const w = currentWord();
-  const typed = input.value;
+      // ✅ espera 1 segundo mostrando la respuesta
+      setTimeout(() => {
+        if(!game2Panel.classList.contains("show")) return;
+        g2Locked = false;
+        renderG2Sentence(); // g2Started sigue true -> sigue la racha automáticamente desde 1/15
+      }, 1000);
+    }
 
-  if (!typed.trim()) {
-    feedback.textContent = "Escribe una palabra para comprobar.";
-    return;
-  }
+    function checkG2(){
+      if(!g2Started || g2Locked) return;
 
-  const ok = (normalizeTextExact(typed) === normalizeTextExact(w.correct));
+      const item = currentG2Item();
+      const auxEl = document.getElementById("g2AuxIn");
+      const verbEl = document.getElementById("g2VerbIn");
 
-  if (ok) {
-    feedback.textContent = "✅ ¡Correcto!";
-    answered = true;
-    setLinesEnabled(false);
-    input.disabled = true;
-    checkBtn.disabled = true;
+      const auxIn = normalize(auxEl ? auxEl.value : "");
+      const verbIn = normalize(verbEl ? verbEl.value : "");
 
-    nextBtn.style.display = "inline-block";
-    btnRow.style.display = "flex";
-    nextBtn.focus();
+      if(verbIn.length === 0){
+        showStatus(g2Status, "warn", "Escribe el verbo principal.");
+        return;
+      }
+      if(item.mode !== "affirm" && auxIn.length === 0){
+        showStatus(g2Status, "warn", "Escribe el auxiliar.");
+        return;
+      }
 
-    updateHintsUI();
-    return;
-  }
+      // ✅ MEJORA: acepta does not / do not y variantes sin apóstrofe (ya en la lista)
+      let auxOk = true;
+      if(item.mode !== "affirm"){
+        auxOk = (item.aux || []).map(normalize).includes(auxIn);
+      }
+      const verbOk = (item.verb || []).map(normalize).includes(verbIn);
 
-  // Incorrecto => reinicia racha
-  resetToStart("❌ Palabra incorrecta. Vuelves al inicio.");
-}
+      if(auxOk && verbOk){
+        stopG2Timer();
+        showStatus(g2Status, "ok", "¡Correcto!");
+        g2Locked = true;
 
-function nextWord() {
-  pos++;
-  updateProgress();
+        setTimeout(() => {
+          g2Locked = false;
 
-  if (pos >= words.length) {
-    showScreen(screenWin);
-    return;
-  }
+          if(g2Streak < 14){
+            setG2Streak(g2Streak + 1);
+            g2Index = g2Streak;
+            renderG2Sentence();
+          } else {
+            setG2Streak(15);
+            winG2();
+          }
+        }, 380);
+      } else {
+        failG2("Incorrecto. ");
+      }
+    }
 
-  loadWord();
-}
+    function startG2Racha(){
+      if(g2Started) return;
+      g2Started = true;
+      clearStatus(g2Status);
+      renderG2Sentence();
+    }
 
-// Eventos
-hintBtn.addEventListener("click", revealOneLetter);
+    function restartG2(){
+      stopG2Timer();
+      setG2Streak(0);
+      g2Index = 0;
+      g2Started = false; // reiniciar vuelve a pedir START
+      g2TimeEl.textContent = String(ROUND_SECONDS);
+      renderG2Sentence();
+    }
 
-checkBtn.addEventListener("click", checkAnswer);
-input.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") checkAnswer();
-});
+    function exitG2(){
+      stopG2Timer();
+      setG2Streak(0);
+      g2Index = 0;
+      g2Started = false;
+      showMenu();
+    }
 
-nextBtn.addEventListener("click", nextWord);
+    function playAgainG2(){
+      g2WinPanel.classList.remove("show");
+      game2Panel.classList.add("show");
+      restartG2();
+    }
 
-startBtn.addEventListener("click", () => {
-  buildDeck();
-  revealedByWordIndex = new Map();
-  hintsLeft = 5;
-  showScreen(screenGame);
-  loadWord();
-});
+    function openGameTwo(){
+      gamesMenu.style.display = "none";
+      game1Panel.classList.remove("show");
+      g2WinPanel.classList.remove("show");
+      game2Panel.classList.add("show");
 
-playAgainBtn.addEventListener("click", () => {
-  showScreen(screenStart);
-});
-</script>
+      setG2Streak(0);
+      g2Index = 0;
+      g2Started = false;
+      renderG2Sentence();
+    }
+
+    openGame2.addEventListener("click", openGameTwo);
+    g2StartBtn.addEventListener("click", startG2Racha);
+    g2CheckBtn.addEventListener("click", checkG2);
+    g2RestartBtn.addEventListener("click", restartG2);
+    g2ExitBtn.addEventListener("click", exitG2);
+    g2PlayAgainBtn.addEventListener("click", playAgainG2);
+    g2WinExitBtn.addEventListener("click", exitG2);
+
+    // Enter: si no ha iniciado -> START, si inició -> CHECK
+    document.addEventListener("keydown", (e) => {
+      if(game2Panel.classList.contains("show") && e.key === "Enter"){
+        if(!g2Started) startG2Racha();
+        else checkG2();
+      }
+    });
+  </script>
 </body>
 </html>
